@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EE Survey">
+<meta name="theme-color" content="#1B3A5C">
+<link rel="manifest" href="./manifest.json">
+<title>Ease Electrical – Site Survey</title>
+
+<style>
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --navy:   #1B3A5C;
+  --blue:   #2970B0;
+  --amber:  #F5A623;
+  --light:  #EDF2F7;
+  --border: #C5D3E0;
+  --text:   #1A202C;
+  --muted:  #64748B;
+  --white:  #FFFFFF;
+  --green:  #2E7D32;
+  --red:    #C62828;
+  --radius: 10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--light);
+  color: var(--text);
+  padding-bottom: calc(80px + var(--safe-bot));
+}
+
+/* ─── Header ────────────────────────────────────────────────── */
+#app-header {
+  background: var(--navy);
+  color: var(--white);
+  padding: calc(var(--safe-top) + 12px) 16px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+#app-header .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#app-header .logo-mark {
+  background: var(--amber);
+  color: var(--navy);
+  font-weight: 900;
+  font-size: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+#app-header .logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+#app-header .logo-text span:first-child {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--amber);
+  letter-spacing: 0.5px;
+}
+#app-header .logo-text span:last-child {
+  font-size: 11px;
+  opacity: 0.8;
+}
+#auth-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+#user-name {
+  font-size: 12px;
+  opacity: 0.9;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#sign-btn {
+  background: var(--amber);
+  color: var(--navy);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+#sign-btn:active { opacity: 0.8; }
+
+/* ─── Progress Bar ──────────────────────────────────────────── */
+#progress-wrap {
+  background: var(--navy);
+  padding: 0 16px 10px;
+}
+#progress-bar-bg {
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+}
+#progress-bar {
+  background: var(--amber);
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+#progress-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ─── Main Content ──────────────────────────────────────────── */
+#main { padding: 16px; max-width: 700px; margin: 0 auto; }
+
+/* ─── Login Screen ──────────────────────────────────────────── */
+#login-screen {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.login-logo {
+  width: 80px;
+  height: 80px;
+  background: var(--navy);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 32px;
+  color: var(--amber);
+}
+#login-screen h1 { font-size: 24px; color: var(--navy); font-weight: 800; }
+#login-screen p { font-size: 15px; color: var(--muted); max-width: 320px; line-height: 1.5; }
+#ms-sign-in-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 16px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 56px;
+  box-shadow: 0 4px 16px rgba(27,58,92,0.3);
+  -webkit-tap-highlight-color: transparent;
+}
+#ms-sign-in-btn:active { opacity: 0.85; transform: scale(0.98); }
+#ms-sign-in-btn svg { flex-shrink: 0; }
+.login-note { font-size: 13px; color: var(--muted); }
+
+/* ─── Section Cards ─────────────────────────────────────────── */
+.section-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.section-header {
+  background: var(--navy);
+  color: var(--white);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.section-header h2 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.section-toggle {
+  font-size: 20px;
+  transition: transform 0.25s ease;
+  opacity: 0.8;
+}
+.section-card.collapsed .section-toggle { transform: rotate(-90deg); }
+.section-body {
+  padding: 16px;
+  display: block;
+}
+.section-card.collapsed .section-body { display: none; }
+
+/* ─── Form Fields ───────────────────────────────────────────── */
+.field-group { margin-bottom: 14px; }
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 5px;
+  display: block;
+}
+.field-label .req { color: var(--amber); margin-left: 2px; }
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px; /* 16px prevents iOS zoom */
+  color: var(--text);
+  background: var(--white);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(41,112,176,0.15);
+}
+textarea { resize: vertical; min-height: 90px; }
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%2364748B' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* ─── Two-column row ────────────────────────────────────────── */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } }
+
+/* ─── Checkboxes (custom pill style) ────────────────────────── */
+.check-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--light);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: all 0.15s;
+}
+.check-item input[type="checkbox"] { display: none; }
+.check-item .cb-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.check-item.selected {
+  background: #E8F0F9;
+  border-color: var(--blue);
+  color: var(--navy);
+}
+.check-item.selected .cb-box {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.check-item.selected .cb-box::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+/* ─── Tables ────────────────────────────────────────────────── */
+.survey-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.survey-table th {
+  background: var(--navy);
+  color: var(--white);
+  padding: 10px 8px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+}
+.survey-table td { padding: 4px; border: 1px solid var(--border); vertical-align: top; }
+.survey-table tr:nth-child(even) td { background: #F8FAFC; }
+.survey-table td input[type="text"],
+.survey-table td select {
+  padding: 8px 6px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+}
+.survey-table td input:focus,
+.survey-table td select:focus {
+  background: var(--white);
+  box-shadow: 0 0 0 2px var(--blue);
+}
+.row-num { width: 28px; text-align: center; color: var(--muted); font-weight: 600; }
+
+/* ─── Grade Reference ───────────────────────────────────────── */
+.grade-ref {
+  background: var(--light);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  border-left: 3px solid var(--blue);
+}
+.grade-ref p { margin-bottom: 4px; color: var(--muted); }
+.grade-ref strong { color: var(--navy); }
+
+/* ─── Info Box ──────────────────────────────────────────────── */
+.info-box {
+  background: #E8F4FD;
+  border: 1px solid #B3D9F0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #1565C0;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+/* ─── Section Divider ───────────────────────────────────────── */
+.field-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+/* ─── Sketch Area ───────────────────────────────────────────── */
+#sketch-canvas-wrap {
+  position: relative;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #FAFBFC;
+  touch-action: none;
+}
+#sketch-canvas { display: block; cursor: crosshair; }
+.sketch-tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  align-items: center;
+}
+.sketch-btn {
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+.sketch-btn.secondary {
+  background: var(--white);
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+}
+.sketch-btn:active { opacity: 0.8; }
+
+/* ─── Bottom Action Bar ─────────────────────────────────────── */
+#action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-top: 1.5px solid var(--border);
+  padding: 12px 16px calc(12px + var(--safe-bot));
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+}
+#save-draft-btn {
+  flex: 1;
+  background: var(--light);
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+#submit-btn {
+  flex: 2;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+#submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#submit-btn:active:not(:disabled) { opacity: 0.85; }
+
+/* ─── Toast ─────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: calc(80px + var(--safe-bot) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy);
+  color: var(--white);
+  padding: 14px 22px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 200;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  max-width: calc(100vw - 40px);
+  text-align: center;
+}
+#toast.success { background: var(--green); }
+#toast.error   { background: var(--red); }
+#toast.show    { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── Spinner ───────────────────────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+.spinner.active { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Add Row Button ────────────────────────────────────────── */
+.add-row-btn {
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  width: 100%;
+  font-size: 13px;
+  color: var(--blue);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+.add-row-btn:hover { background: var(--light); }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ══════════════════════════════════════════════════ -->
+<header id="app-header">
+  <div class="logo">
+    <div class="logo-mark">EE</div>
+    <div class="logo-text">
+      <span>EASE ELECTRICAL LTD</span>
+      <span>PD 6662:2017 Site Survey</span>
+    </div>
+  </div>
+  <div id="auth-status">
+    <span id="user-name" style="display:none"></span>
+    <button id="sign-btn" onclick="handleAuthClick()">Sign In</button>
+  </div>
+</header>
+
+<div id="progress-wrap">
+  <div id="progress-bar-bg"><div id="progress-bar"></div></div>
+  <div id="progress-label">0% complete</div>
+</div>
+
+<!-- ═══ MAIN ═════════════════════════════════════════════════════ -->
+<main id="main">
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <div class="login-logo">EE</div>
+    <h1>Site Survey</h1>
+    <p>Sign in with your Microsoft 365 work account to complete and save surveys directly to OneDrive.</p>
+    <button id="ms-sign-in-btn" onclick="handleAuthClick()">
+      <svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+        <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+      </svg>
+      Sign in with Microsoft 365
+    </button>
+    <p class="login-note">Surveys are saved to your OneDrive under<br><strong>Ease Electrical Surveys</strong></p>
+  </div>
+
+  <!-- SURVEY FORM (hidden until signed in) -->
+  <div id="survey-form" style="display:none">
+
+  <!-- ── S1: Survey Details ───────────────────────────────────── -->
+  <div class="section-card" id="s1">
+    <div class="section-header" onclick="toggleSection('s1')">
+      <h2>1. Survey Details</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Survey Ref <span class="req">*</span></label>
+          <input type="text" id="f_sref" placeholder="EASE-SS-001" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date of Survey <span class="req">*</span></label>
+          <input type="date" id="f_date" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Surveyor Name <span class="req">*</span></label>
+          <input type="text" id="f_surveyor" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">NSI / SSAIB No</label>
+          <input type="text" id="f_ssaib" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Company</label>
+          <input type="text" id="f_company" value="Ease Electrical Ltd" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Contact Tel</label>
+          <input type="tel" id="f_contacttel" oninput="updateProgress()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S2: Client & Site Information ───────────────────────── -->
+  <div class="section-card" id="s2">
+    <div class="section-header" onclick="toggleSection('s2')">
+      <h2>2. Client &amp; Site Information</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Client Name <span class="req">*</span></label>
+          <input type="text" id="f_cname" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Site Name / Ref</label>
+          <input type="text" id="f_sname" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Site Address <span class="req">*</span></label>
+        <textarea id="f_saddr" rows="3" placeholder="Full address including postcode" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Postcode</label>
+          <input type="text" id="f_postcode" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Client Tel</label>
+          <input type="tel" id="f_ctel" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Client Email</label>
+          <input type="email" id="f_cemail" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Billing Address (if different)</label>
+          <input type="text" id="f_baddr" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Key Holder 1</label>
+          <input type="text" id="f_kh1" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">KH1 Tel</label>
+          <input type="tel" id="f_kh1tel" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Key Holder 2</label>
+          <input type="text" id="f_kh2" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">KH2 Tel</label>
+          <input type="tel" id="f_kh2tel" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Police URN</label>
+          <input type="text" id="f_urn" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Insurer (if known)</label>
+          <input type="text" id="f_insurer" oninput="updateProgress()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S3: Property Details ─────────────────────────────────── -->
+  <div class="section-card" id="s3">
+    <div class="section-header" onclick="toggleSection('s3')">
+      <h2>3. Property Details</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Property Type</label>
+        <div class="check-group" id="cg_proptype">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="proptype" value="Detached House"><span class="cb-box"></span>Detached House</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="proptype" value="Semi-Detached"><span class="cb-box"></span>Semi-Detached</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="proptype" value="Terraced"><span class="cb-box"></span>Terraced</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="proptype" value="Flat/Apt"><span class="cb-box"></span>Flat / Apt</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="proptype" value="Commercial"><span class="cb-box"></span>Commercial</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="proptype" value="Industrial"><span class="cb-box"></span>Industrial</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Construction</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="construction" value="Brick/Block"><span class="cb-box"></span>Brick/Block</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="construction" value="Timber Frame"><span class="cb-box"></span>Timber Frame</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="construction" value="Steel Frame"><span class="cb-box"></span>Steel Frame</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="construction" value="Concrete"><span class="cb-box"></span>Concrete</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="construction" value="Mixed"><span class="cb-box"></span>Mixed</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">No. of Floors</label>
+          <input type="number" id="f_floors" min="1" max="50" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Year Built (approx)</label>
+          <input type="text" id="f_yearbuilt" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Occupancy</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="occupancy" value="Permanently Occupied"><span class="cb-box"></span>Permanently Occupied</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="occupancy" value="Part-time"><span class="cb-box"></span>Part-time</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="occupancy" value="Unoccupied (days)"><span class="cb-box"></span>Unoccupied (days)</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="occupancy" value="Unoccupied (nights)"><span class="cb-box"></span>Unoccupied (nights)</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="occupancy" value="Vacant"><span class="cb-box"></span>Vacant</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Usage</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="usage" value="Domestic"><span class="cb-box"></span>Domestic</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="usage" value="Retail/Shop"><span class="cb-box"></span>Retail/Shop</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="usage" value="Office"><span class="cb-box"></span>Office</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="usage" value="Warehouse"><span class="cb-box"></span>Warehouse</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="usage" value="Manufacturing"><span class="cb-box"></span>Manufacturing</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Opening Hours</label>
+          <input type="text" id="f_hours" placeholder="e.g. Mon–Fri 08:00–18:00" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Last Set Time (typical)</label>
+          <input type="text" id="f_lastset" placeholder="e.g. 18:30" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Access Points (total)</label>
+          <input type="number" id="f_access" min="0" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Vulnerable Points Noted</label>
+          <input type="text" id="f_vulnpts" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">CCTV Present?</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cctv" value="Yes – monitored"><span class="cb-box"></span>Yes – monitored</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cctv" value="Yes – recorded only"><span class="cb-box"></span>Yes – recorded only</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cctv" value="No"><span class="cb-box"></span>No</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Other Security</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="othersec" value="Access Control"><span class="cb-box"></span>Access Control</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="othersec" value="Security Lighting"><span class="cb-box"></span>Security Lighting</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="othersec" value="Shutters/Grilles"><span class="cb-box"></span>Shutters/Grilles</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="othersec" value="Safe/Vault"><span class="cb-box"></span>Safe/Vault</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="othersec" value="Guard/Concierge"><span class="cb-box"></span>Guard/Concierge</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="othersec" value="None"><span class="cb-box"></span>None</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S4: Existing Alarm System ────────────────────────────── -->
+  <div class="section-card" id="s4">
+    <div class="section-header" onclick="toggleSection('s4')">
+      <h2>4. Existing Alarm System</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Existing System?</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="existing" value="No – new install"><span class="cb-box"></span>No – new install</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="existing" value="Yes – replace"><span class="cb-box"></span>Yes – replace</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="existing" value="Yes – upgrade/extend"><span class="cb-box"></span>Yes – upgrade/extend</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="existing" value="Yes – takeover only"><span class="cb-box"></span>Yes – takeover only</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Existing Make / Model</label>
+          <input type="text" id="f_exmake" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Approx Age (yrs)</label>
+          <input type="number" id="f_exage" min="0" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Existing Grade (if known)</label>
+          <select id="f_exgrade">
+            <option value="">– select –</option>
+            <option>Grade 1</option><option>Grade 2</option>
+            <option>Grade 3</option><option>Grade 4</option><option>Unknown</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Existing Zones (no.)</label>
+          <input type="number" id="f_exzones" min="0" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Wiring Condition</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="wiring" value="Good – retain wiring"><span class="cb-box"></span>Good – retain wiring</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="wiring" value="Fair – partial rewire"><span class="cb-box"></span>Fair – partial rewire</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="wiring" value="Poor – full rewire required"><span class="cb-box"></span>Poor – full rewire required</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="wiring" value="Unknown"><span class="cb-box"></span>Unknown</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">ARC Contract?</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="arc" value="Yes – retain existing ARC"><span class="cb-box"></span>Yes – retain existing ARC</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="arc" value="Yes – transfer to new ARC"><span class="cb-box"></span>Yes – transfer to new ARC</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="arc" value="No – self-monitoring"><span class="cb-box"></span>No – self-monitoring</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="arc" value="No – bells only"><span class="cb-box"></span>No – bells only</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S5: Grade & Environmental Class ──────────────────────── -->
+  <div class="section-card" id="s5">
+    <div class="section-header" onclick="toggleSection('s5')">
+      <h2>5. Grade &amp; Environmental Class</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="grade-ref">
+        <p><strong>Grade 1</strong> – Low risk. Little knowledge of alarm systems. Typically domestic/low-value commercial.</p>
+        <p><strong>Grade 2</strong> – Low-medium risk. Some knowledge. Most domestic/small commercial.</p>
+        <p><strong>Grade 3</strong> – Medium-high risk. Specialist equipment. Banks, jewellers, high-value.</p>
+        <p><strong>Grade 4</strong> – High risk. Full substitution attack possible. Extreme-risk premises.</p>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Recommended Grade</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="grade" value="Grade 1"><span class="cb-box"></span>Grade 1</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="grade" value="Grade 2"><span class="cb-box"></span>Grade 2</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="grade" value="Grade 3"><span class="cb-box"></span>Grade 3</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="grade" value="Grade 4"><span class="cb-box"></span>Grade 4</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Grade Justification</label>
+        <textarea id="f_gradejust" rows="2" oninput="updateProgress()"></textarea>
+      </div>
+      <hr class="field-divider">
+      <div class="grade-ref">
+        <p><strong>Class I</strong> – Indoor, sheltered, temperature-controlled (heated interior).</p>
+        <p><strong>Class II</strong> – Indoor, general. Non-temperature controlled (unheated garage, loft).</p>
+        <p><strong>Class III</strong> – Outdoor, sheltered (canopy, covered external area).</p>
+        <p><strong>Class IV</strong> – Outdoor, general. Fully exposed.</p>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Environmental Class</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="envclass" value="Class I"><span class="cb-box"></span>Class I</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="envclass" value="Class II"><span class="cb-box"></span>Class II</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="envclass" value="Class III"><span class="cb-box"></span>Class III</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="envclass" value="Class IV"><span class="cb-box"></span>Class IV</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="envclass" value="Mixed"><span class="cb-box"></span>Mixed – see notes</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Confirmed System Grade</label>
+          <select id="f_confgrade">
+            <option value="">– select –</option>
+            <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Confirmed Env. Class</label>
+          <select id="f_confenv">
+            <option value="">– select –</option>
+            <option>Class I</option><option>Class II</option><option>Class III</option><option>Class IV</option><option>Mixed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S6: Entry/Exit Routes ────────────────────────────────── -->
+  <div class="section-card" id="s6">
+    <div class="section-header" onclick="toggleSection('s6')">
+      <h2>6. Entry / Exit Route Details</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="info-box">Per BS EN 50131-1 Annex B. Entry delay typically 30–45 s; exit 30–60 s.</div>
+      <div style="overflow-x:auto">
+        <table class="survey-table" id="ee-table">
+          <thead><tr>
+            <th class="row-num">No</th>
+            <th>Location / Door</th>
+            <th>Device Proposed</th>
+            <th>Entry Delay (s)</th>
+            <th>Exit Delay (s)</th>
+            <th>Final Exit?</th>
+            <th>Entry Route?</th>
+          </tr></thead>
+          <tbody id="ee-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addEERow()">+ Add Entry/Exit Route</button>
+    </div>
+  </div>
+
+  <!-- ── S7: Detection Zone Schedule ──────────────────────────── -->
+  <div class="section-card" id="s7">
+    <div class="section-header" onclick="toggleSection('s7')">
+      <h2>7. Detection Zone Schedule</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div style="overflow-x:auto">
+        <table class="survey-table" id="dz-table">
+          <thead><tr>
+            <th class="row-num">No</th>
+            <th>Floor</th>
+            <th>Room / Area</th>
+            <th>Device Type</th>
+            <th>Make / Model</th>
+            <th>Grade</th>
+            <th>Env</th>
+            <th>Wired / WL</th>
+            <th>Tamper?</th>
+            <th>Notes</th>
+          </tr></thead>
+          <tbody id="dz-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addDZRow()">+ Add Detection Zone</button>
+    </div>
+  </div>
+
+  <!-- ── S8: CIE ───────────────────────────────────────────────── -->
+  <div class="section-card" id="s8">
+    <div class="section-header" onclick="toggleSection('s8')">
+      <h2>8. Control &amp; Indicating Equipment (CIE)</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">CIE Make / Model</label>
+          <input type="text" id="f_ciemake" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">CIE Location</label>
+          <input type="text" id="f_cieloc" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">CIE Grade</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="ciegrade" value="Grade 1"><span class="cb-box"></span>Grade 1</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="ciegrade" value="Grade 2"><span class="cb-box"></span>Grade 2</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="ciegrade" value="Grade 3"><span class="cb-box"></span>Grade 3</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="ciegrade" value="Grade 4"><span class="cb-box"></span>Grade 4</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">No. of Zones</label>
+          <input type="number" id="f_ciezones" min="0" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">No. of Users</label>
+          <input type="number" id="f_cieusers" min="0" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Keypad Type</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="kptype" value="Digital Keypad"><span class="cb-box"></span>Digital Keypad</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="kptype" value="Proximity Fob"><span class="cb-box"></span>Proximity Fob</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="kptype" value="Biometric"><span class="cb-box"></span>Biometric</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="kptype" value="Combined"><span class="cb-box"></span>Combined</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Keypad Location(s)</label>
+          <input type="text" id="f_kploc" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">No. of Keypads</label>
+          <input type="number" id="f_kpqty" min="0" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Event Log</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evlog" value="On-board"><span class="cb-box"></span>On-board</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evlog" value="Remote/Cloud"><span class="cb-box"></span>Remote / Cloud</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evlog" value="ARC Log Only"><span class="cb-box"></span>ARC Log Only</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Log Capacity (events)</label>
+          <input type="number" id="f_logcap" min="0" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">EN 50131 Compliant?</label>
+          <select id="f_ciecompliant">
+            <option value="">– select –</option>
+            <option>Yes</option><option>No</option><option>TBC</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S9: Signalling / ARC ──────────────────────────────────── -->
+  <div class="section-card" id="s9">
+    <div class="section-header" onclick="toggleSection('s9')">
+      <h2>9. Signalling &amp; ARC</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Signalling Method</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="sigmethod" value="PSTN"><span class="cb-box"></span>PSTN</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="sigmethod" value="Dual-path (PSTN + IP)"><span class="cb-box"></span>Dual-path (PSTN + IP)</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="sigmethod" value="IP Only"><span class="cb-box"></span>IP Only</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="sigmethod" value="GSM / GPRS"><span class="cb-box"></span>GSM / GPRS</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="sigmethod" value="App / Self-monitor"><span class="cb-box"></span>App / Self-monitor</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="sigmethod" value="None"><span class="cb-box"></span>None</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">ARC Name</label>
+          <input type="text" id="f_arcname" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">ARC Tel</label>
+          <input type="tel" id="f_arctel" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Signalling Standard</label>
+          <select id="f_sigstd">
+            <option value="">– select –</option>
+            <option>BS 8218</option><option>EN 50136</option><option>SIA DC-09</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Response Category</label>
+          <select id="f_respcat">
+            <option value="">– select –</option>
+            <option>Category 1 (Police)</option><option>Category 2 (Keyholder then Police)</option><option>Category 3 (Keyholder only)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Confirmed Alarm (BS 8243)</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="confalarm" value="Sequential Detection"><span class="cb-box"></span>Sequential Detection</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="confalarm" value="Audio Verification"><span class="cb-box"></span>Audio Verification</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="confalarm" value="CCTV Verification"><span class="cb-box"></span>CCTV Verification</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="confalarm" value="Not Required"><span class="cb-box"></span>Not Required</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S10: Sounders / Warning Devices ──────────────────────── -->
+  <div class="section-card" id="s10">
+    <div class="section-header" onclick="toggleSection('s10')">
+      <h2>10. Sounders &amp; Warning Devices</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div id="sd-rows"></div>
+      <button class="add-row-btn" onclick="addSDRow()">+ Add Sounder / Device</button>
+      <hr class="field-divider">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Sounder Delay (s)</label>
+          <input type="number" id="f_snddelay" min="0" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Sounder Duration (min)</label>
+          <input type="number" id="f_snddur" min="0" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Strobe Required?</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="strobe" value="Yes"><span class="cb-box"></span>Yes</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="strobe" value="No"><span class="cb-box"></span>No</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S11: Power Supply ─────────────────────────────────────── -->
+  <div class="section-card" id="s11">
+    <div class="section-header" onclick="toggleSection('s11')">
+      <h2>11. Power Supply</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Mains Supply Available?</label>
+          <div class="check-group">
+            <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="mains" value="Yes"><span class="cb-box"></span>Yes</label>
+            <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="mains" value="No"><span class="cb-box"></span>No</label>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Spur Available Near CIE?</label>
+          <div class="check-group">
+            <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="spur" value="Yes"><span class="cb-box"></span>Yes</label>
+            <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="spur" value="No – new spur required"><span class="cb-box"></span>No – new spur required</label>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Standby Battery (hrs required)</label>
+          <select id="f_batthrs">
+            <option value="">– select –</option>
+            <option>12 hrs (Grade 1/2)</option>
+            <option>24 hrs (Grade 2 ARC)</option>
+            <option>60 hrs (Grade 3)</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Standby Battery Type</label>
+          <select id="f_batttype">
+            <option value="">– select –</option>
+            <option>Sealed Lead Acid</option>
+            <option>Lithium</option>
+            <option>NiMH</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Consumer Unit Location</label>
+          <input type="text" id="f_culoc" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">BS 7671:2018 Compliant CU?</label>
+          <select id="f_cucompliant">
+            <option value="">– select –</option>
+            <option>Yes</option><option>No – older board</option><option>Unknown</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Power Supply Notes</label>
+        <textarea id="f_pwnotes" rows="2" oninput="updateProgress()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S12: Cabling ──────────────────────────────────────────── -->
+  <div class="section-card" id="s12">
+    <div class="section-header" onclick="toggleSection('s12')">
+      <h2>12. Cabling &amp; Containment</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Cable Type</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cabletype" value="6-Core Screened"><span class="cb-box"></span>6-Core Screened</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cabletype" value="4-Core Screened"><span class="cb-box"></span>4-Core Screened</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cabletype" value="Wireless"><span class="cb-box"></span>Wireless</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cabletype" value="Hybrid (wired + wireless)"><span class="cb-box"></span>Hybrid</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Cable Route / Containment</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cableroute" value="Surface trunking"><span class="cb-box"></span>Surface trunking</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cableroute" value="Concealed in walls"><span class="cb-box"></span>Concealed in walls</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cableroute" value="Under floor"><span class="cb-box"></span>Under floor</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cableroute" value="Void / ceiling"><span class="cb-box"></span>Void / ceiling</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="cableroute" value="Cable tray"><span class="cb-box"></span>Cable tray</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Cabling Notes / Difficulties</label>
+        <textarea id="f_cablenotes" rows="2" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Approx Cable Run (m)</label>
+          <input type="number" id="f_cablerun" min="0" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Fire-Rated Cable Required?</label>
+          <div class="check-group">
+            <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="firerated" value="Yes"><span class="cb-box"></span>Yes</label>
+            <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="firerated" value="No"><span class="cb-box"></span>No</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S13: Additional Requirements ─────────────────────────── -->
+  <div class="section-card" id="s13">
+    <div class="section-header" onclick="toggleSection('s13')">
+      <h2>13. Additional Requirements</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label">Panic / Hold-Up Buttons</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="panic" value="Fixed"><span class="cb-box"></span>Fixed</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="panic" value="Portable / Fob"><span class="cb-box"></span>Portable / Fob</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="panic" value="None required"><span class="cb-box"></span>None required</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">No. of Panic Buttons</label>
+        <input type="number" id="f_panicqty" min="0" oninput="updateProgress()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Remote Access / App</label>
+        <div class="check-group">
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="remoteapp" value="Yes – required"><span class="cb-box"></span>Yes – required</label>
+          <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="remoteapp" value="Not required"><span class="cb-box"></span>Not required</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Smart Home / Integration</label>
+        <textarea id="f_smarthome" rows="2" placeholder="e.g. integration with existing system" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Special Risks / Hazards on Site</label>
+        <textarea id="f_hazards" rows="2" placeholder="e.g. pets, dusty environment, high humidity" oninput="updateProgress()"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Client Specific Requirements</label>
+        <textarea id="f_clientreqs" rows="2" oninput="updateProgress()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S14: Site Sketch ──────────────────────────────────────── -->
+  <div class="section-card" id="s14">
+    <div class="section-header" onclick="toggleSection('s14')">
+      <h2>14. Site Sketch / Floor Plan</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="info-box">Use your finger or stylus to sketch the floor plan and mark detector positions. Use the tools below.</div>
+      <div id="sketch-canvas-wrap">
+        <canvas id="sketch-canvas"></canvas>
+      </div>
+      <div class="sketch-tools">
+        <button class="sketch-btn" onclick="setSketchColor('#1B3A5C')" style="width:44px;background:#1B3A5C;" title="Navy"></button>
+        <button class="sketch-btn" onclick="setSketchColor('#E53E3E')" style="width:44px;background:#E53E3E;" title="Red"></button>
+        <button class="sketch-btn" onclick="setSketchColor('#2E7D32')" style="width:44px;background:#2E7D32;" title="Green"></button>
+        <button class="sketch-btn" onclick="setSketchColor('#F5A623')" style="width:44px;background:#F5A623;" title="Amber"></button>
+        <button class="sketch-btn secondary" onclick="toggleEraser()">✏ / Eraser</button>
+        <button class="sketch-btn secondary" onclick="clearSketch()">Clear</button>
+        <label class="sketch-btn secondary" style="cursor:pointer">
+          📷 Photo
+          <input type="file" id="photo-input" accept="image/*" capture="environment" onchange="insertPhoto(event)" style="display:none">
+        </label>
+      </div>
+      <div class="field-group" style="margin-top:12px">
+        <label class="field-label">Sketch Notes / Key</label>
+        <textarea id="f_sketchnotes" rows="2" placeholder="e.g. PIR = Passive IR detector, MC = Magnetic contact" oninput="updateProgress()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S15: Quotation Summary ────────────────────────────────── -->
+  <div class="section-card" id="s15">
+    <div class="section-header" onclick="toggleSection('s15')">
+      <h2>15. Preliminary Quotation Summary</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div style="overflow-x:auto">
+        <table class="survey-table" id="qt-table">
+          <thead><tr>
+            <th>Item Description</th>
+            <th style="width:60px">Qty</th>
+            <th style="width:80px">Unit (£)</th>
+            <th style="width:90px">Total (£)</th>
+          </tr></thead>
+          <tbody id="qt-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="text-align:right;padding:10px 8px;font-weight:700;color:var(--navy)">Subtotal</td>
+              <td style="padding:8px;font-weight:700;color:var(--navy)" id="qt-subtotal">£0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addQTRow()">+ Add Line Item</button>
+      <hr class="field-divider">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Estimated Install Time (days)</label>
+          <input type="number" id="f_installdays" min="0" step="0.5" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Annual Maintenance (£)</label>
+          <input type="number" id="f_maintenance" min="0" step="0.01" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Notes / Exclusions</label>
+        <textarea id="f_qtnotes" rows="2" oninput="updateProgress()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S16: Declaration ──────────────────────────────────────── -->
+  <div class="section-card" id="s16">
+    <div class="section-header" onclick="toggleSection('s16')">
+      <h2>16. Surveyor Declaration &amp; Sign-Off</h2>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="info-box">
+        I confirm that this survey has been conducted in accordance with PD 6662:2017 and the relevant
+        BS EN 50131 series standards, and that the system design information above represents an accurate
+        assessment of the site requirements.
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Surveyor Name</label>
+          <input type="text" id="f_declname" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date</label>
+          <input type="date" id="f_decldate" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">NSI / SSAIB Cert No</label>
+          <input type="text" id="f_declcert" oninput="updateProgress()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Company</label>
+          <input type="text" id="f_declco" value="Ease Electrical Ltd" oninput="updateProgress()">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Surveyor Signature (draw below)</label>
+        <div id="sig-canvas-wrap" style="border:1.5px solid var(--border);border-radius:8px;overflow:hidden;background:#FAFBFC;touch-action:none;">
+          <canvas id="sig-canvas" style="display:block;cursor:crosshair;"></canvas>
+        </div>
+        <div class="sketch-tools">
+          <button class="sketch-btn secondary" onclick="clearSig()">Clear Signature</button>
+        </div>
+      </div>
+      <hr class="field-divider">
+      <div class="field-group">
+        <label class="field-label">Client / Site Representative Name</label>
+        <input type="text" id="f_clientrepname" oninput="updateProgress()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Client Signature (draw below)</label>
+        <div id="clsig-canvas-wrap" style="border:1.5px solid var(--border);border-radius:8px;overflow:hidden;background:#FAFBFC;touch-action:none;">
+          <canvas id="clsig-canvas" style="display:block;cursor:crosshair;"></canvas>
+        </div>
+        <div class="sketch-tools">
+          <button class="sketch-btn secondary" onclick="clearClSig()">Clear Signature</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Survey Notes / Additional Observations</label>
+        <textarea id="f_surveynotes" rows="4" oninput="updateProgress()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /survey-form -->
+</main>
+
+<!-- ═══ ACTION BAR ═══════════════════════════════════════════════ -->
+<div id="action-bar" style="display:none">
+  <button id="save-draft-btn" onclick="saveDraft()">💾 Save Draft</button>
+  <button id="submit-btn" onclick="submitSurvey()">
+    <span id="submit-label">Submit &amp; Save to OneDrive</span>
+    <div id="submit-spinner" class="spinner"></div>
+  </button>
+</div>
+
+<!-- ═══ TOAST ════════════════════════════════════════════════════ -->
+<div id="toast"></div>
+
+<!-- ═══ SCRIPTS ═════════════════════════════════════════════════ -->
+<script src="https://alcdn.msauth.net/browser/3.27.0/js/msal-browser.min.js"></script>
+<script>
+/* ─────────────────────────────────────────────────────────────
+   CONFIGURATION — update CLIENT_ID after Azure AD app registration
+   ───────────────────────────────────────────────────────────── */
+const CONFIG = {
+  CLIENT_ID:    'YOUR_CLIENT_ID_HERE',   // ← Paste your Azure AD App (client) ID here
+  ONEDRIVE_FOLDER: 'Ease Electrical Surveys',
+};
+
+/* ─── MSAL Setup ──────────────────────────────────────────────── */
+const msalConfig = {
+  auth: {
+    clientId: CONFIG.CLIENT_ID,
+    authority: 'https://login.microsoftonline.com/organizations',
+    redirectUri: window.location.href.split('?')[0].split('#')[0],
+  },
+  cache: {
+    cacheLocation: 'localStorage',
+    storeAuthStateInCookie: true,  // Required for iOS Safari
+  },
+};
+const loginScopes = ['User.Read', 'Files.ReadWrite'];
+let msalInstance;
+let currentAccount = null;
+
+async function initMsal() {
+  msalInstance = new msal.PublicClientApplication(msalConfig);
+  await msalInstance.initialize();
+
+  // Handle redirect response after login
+  try {
+    const result = await msalInstance.handleRedirectPromise();
+    if (result && result.account) {
+      currentAccount = result.account;
+      onSignedIn();
+    }
+  } catch (e) {
+    console.error('Redirect error:', e);
+  }
+
+  // Check if already signed in
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    currentAccount = accounts[0];
+    onSignedIn();
+  }
+}
+
+async function handleAuthClick() {
+  if (currentAccount) {
+    // Sign out
+    msalInstance.logoutRedirect({ account: currentAccount });
+    return;
+  }
+  // Sign in via redirect (most reliable on iOS Safari)
+  msalInstance.loginRedirect({ scopes: loginScopes });
+}
+
+async function getAccessToken() {
+  const request = { scopes: loginScopes, account: currentAccount };
+  try {
+    const result = await msalInstance.acquireTokenSilent(request);
+    return result.accessToken;
+  } catch (e) {
+    // Silent failed — try redirect
+    msalInstance.acquireTokenRedirect(request);
+    return null;
+  }
+}
+
+function onSignedIn() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('survey-form').style.display = 'block';
+  document.getElementById('action-bar').style.display = 'flex';
+  document.getElementById('user-name').textContent = currentAccount.name || currentAccount.username;
+  document.getElementById('user-name').style.display = 'block';
+  document.getElementById('sign-btn').textContent = 'Sign Out';
+  loadDraft();
+  updateProgress();
+  // Pre-fill date and surveyor name
+  if (!document.getElementById('f_date').value) {
+    document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
+  }
+  if (!document.getElementById('f_surveyor').value) {
+    document.getElementById('f_surveyor').value = currentAccount.name || '';
+  }
+  if (!document.getElementById('f_declname').value) {
+    document.getElementById('f_declname').value = currentAccount.name || '';
+  }
+}
+
+/* ─── Section Toggle ──────────────────────────────────────────── */
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+/* ─── Checkbox Toggle ─────────────────────────────────────────── */
+function toggleCheck(el) {
+  el.classList.toggle('selected');
+  const cb = el.querySelector('input[type="checkbox"]');
+  cb.checked = el.classList.contains('selected');
+}
+
+/* ─── Progress Bar ────────────────────────────────────────────── */
+function updateProgress() {
+  const inputs = document.querySelectorAll('#survey-form input[type="text"], #survey-form input[type="tel"], #survey-form input[type="email"], #survey-form input[type="number"], #survey-form input[type="date"], #survey-form textarea');
+  let filled = 0;
+  inputs.forEach(i => { if (i.value.trim()) filled++; });
+  const pct = inputs.length ? Math.round((filled / inputs.length) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = pct + '% complete';
+  scheduleSave();
+}
+
+/* ─── Auto-save (localStorage draft) ─────────────────────────── */
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveDraft, 800);
+}
+
+function saveDraft() {
+  const data = collectFormData();
+  localStorage.setItem('ee_survey_draft_v1', JSON.stringify(data));
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem('ee_survey_draft_v1');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    restoreFormData(data);
+    toast('Draft restored', 'success');
+  } catch(e) { console.warn('Draft load failed', e); }
+}
+
+/* ─── Collect all form data ───────────────────────────────────── */
+function collectFormData() {
+  const d = {};
+  // Text / tel / email / number / date inputs
+  document.querySelectorAll('#survey-form [id^="f_"]').forEach(el => {
+    d[el.id] = el.value;
+  });
+  // Checkboxes
+  document.querySelectorAll('#survey-form input[type="checkbox"]').forEach(cb => {
+    const key = '__cb_' + cb.name + '__' + cb.value.replace(/\s+/g, '_');
+    d[key] = cb.checked;
+  });
+  // Tables
+  d['__ee_rows'] = collectTableRows('ee-body', ['loc','device','entry','exit','finalexit','entryroute']);
+  d['__dz_rows'] = collectTableRows('dz-body', ['floor','room','devtype','model','grade','env','wiredwl','tamper','notes']);
+  d['__sd_rows'] = collectSDRows();
+  d['__qt_rows'] = collectTableRows('qt-body', ['desc','qty','unit','total']);
+  // Canvases
+  d['__sketch'] = document.getElementById('sketch-canvas').toDataURL();
+  d['__sig']    = document.getElementById('sig-canvas').toDataURL();
+  d['__clsig']  = document.getElementById('clsig-canvas').toDataURL();
+  return d;
+}
+
+function collectTableRows(tbodyId, fields) {
+  const rows = [];
+  document.querySelectorAll('#' + tbodyId + ' tr').forEach(tr => {
+    const row = {};
+    fields.forEach((f, i) => {
+      const el = tr.cells[i + 1]; // skip row-num cell
+      if (!el) return;
+      const inp = el.querySelector('input, select');
+      if (inp) row[f] = inp.value;
+    });
+    rows.push(row);
+  });
+  return rows;
+}
+
+function collectSDRows() {
+  const rows = [];
+  document.querySelectorAll('#sd-rows .sd-row').forEach(r => {
+    const inputs = r.querySelectorAll('input, select');
+    rows.push({ loc: inputs[0]?.value, type: inputs[1]?.value, make: inputs[2]?.value, grade: inputs[3]?.value });
+  });
+  return rows;
+}
+
+/* ─── Restore form data ───────────────────────────────────────── */
+function restoreFormData(d) {
+  Object.keys(d).forEach(k => {
+    if (k.startsWith('__')) return;
+    const el = document.getElementById(k);
+    if (el) el.value = d[k];
+  });
+  // Checkboxes
+  document.querySelectorAll('#survey-form input[type="checkbox"]').forEach(cb => {
+    const key = '__cb_' + cb.name + '__' + cb.value.replace(/\s+/g, '_');
+    if (d[key]) {
+      cb.checked = true;
+      cb.closest('.check-item')?.classList.add('selected');
+    }
+  });
+  // Tables
+  if (d['__ee_rows']) { d['__ee_rows'].forEach(() => addEERow()); restoreTableRows('ee-body', d['__ee_rows'], ['loc','device','entry','exit','finalexit','entryroute']); }
+  if (d['__dz_rows']) { d['__dz_rows'].forEach(() => addDZRow()); restoreTableRows('dz-body', d['__dz_rows'], ['floor','room','devtype','model','grade','env','wiredwl','tamper','notes']); }
+  if (d['__sd_rows']) { d['__sd_rows'].forEach(r => addSDRow(r)); }
+  if (d['__qt_rows']) { d['__qt_rows'].forEach(() => addQTRow()); restoreTableRows('qt-body', d['__qt_rows'], ['desc','qty','unit','total']); calcTotal(); }
+  // Canvases — restore after layout
+  setTimeout(() => {
+    if (d['__sketch']) loadCanvas('sketch-canvas', d['__sketch']);
+    if (d['__sig'])    loadCanvas('sig-canvas', d['__sig']);
+    if (d['__clsig'])  loadCanvas('clsig-canvas', d['__clsig']);
+  }, 200);
+}
+
+function restoreTableRows(tbodyId, rows, fields) {
+  const trs = document.querySelectorAll('#' + tbodyId + ' tr');
+  rows.forEach((row, i) => {
+    const tr = trs[i];
+    if (!tr) return;
+    fields.forEach((f, ci) => {
+      const el = tr.cells[ci + 1];
+      if (!el) return;
+      const inp = el.querySelector('input, select');
+      if (inp && row[f] !== undefined) inp.value = row[f];
+    });
+  });
+}
+
+function loadCanvas(id, dataUrl) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = () => ctx.drawImage(img, 0, 0);
+  img.src = dataUrl;
+}
+
+/* ─── Dynamic Table Rows ──────────────────────────────────────── */
+function addEERow() {
+  const tbody = document.getElementById('ee-body');
+  const n = tbody.rows.length + 1;
+  const tr = tbody.insertRow();
+  tr.innerHTML = `
+    <td class="row-num">${n}</td>
+    <td><input type="text" placeholder="Location / Door"></td>
+    <td><input type="text" placeholder="PIR / MC etc."></td>
+    <td><input type="number" placeholder="30" min="0" style="width:100%"></td>
+    <td><input type="number" placeholder="45" min="0" style="width:100%"></td>
+    <td><select><option>Yes</option><option>No</option></select></td>
+    <td><select><option>Yes</option><option>No</option></select></td>
+  `;
+}
+
+function addDZRow() {
+  const tbody = document.getElementById('dz-body');
+  const n = tbody.rows.length + 1;
+  const tr = tbody.insertRow();
+  tr.innerHTML = `
+    <td class="row-num">${n}</td>
+    <td><input type="text" placeholder="GF"></td>
+    <td><input type="text" placeholder="Hall"></td>
+    <td><select style="min-width:90px"><option value="">Type</option><option>PIR</option><option>Dual-tech</option><option>Magnetic Contact</option><option>Vibration</option><option>Glass Break</option><option>Beam</option><option>Panic Button</option><option>Smoke</option><option>CO</option><option>Shock Sensor</option><option>Other</option></select></td>
+    <td><input type="text" placeholder="Make/Model"></td>
+    <td><select><option value="">G</option><option>1</option><option>2</option><option>3</option><option>4</option></select></td>
+    <td><select><option value="">Env</option><option>I</option><option>II</option><option>III</option><option>IV</option></select></td>
+    <td><select><option>Wired</option><option>Wireless</option></select></td>
+    <td><select><option>Yes</option><option>No</option></select></td>
+    <td><input type="text" placeholder="Notes"></td>
+  `;
+}
+
+let sdCount = 0;
+function addSDRow(data) {
+  sdCount++;
+  const wrap = document.getElementById('sd-rows');
+  const div = document.createElement('div');
+  div.className = 'sd-row';
+  div.style.cssText = 'background:var(--light);border-radius:8px;padding:12px;margin-bottom:10px;';
+  div.innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">Sounder / Device #${sdCount}</div>
+    <div class="field-row">
+      <div class="field-group"><label class="field-label">Location</label><input type="text" value="${data?.loc||''}" oninput="updateProgress()"></div>
+      <div class="field-group"><label class="field-label">Type</label><select>
+        <option>External Bell Box</option><option>Internal Sounder</option><option>Strobe</option><option>PA / Speech</option><option>Smoke Detector</option><option>Other</option>
+      </select></div>
+    </div>
+    <div class="field-row">
+      <div class="field-group"><label class="field-label">Make / Model</label><input type="text" value="${data?.make||''}" oninput="updateProgress()"></div>
+      <div class="field-group"><label class="field-label">Grade</label><select>
+        <option value="">– select –</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option>
+      </select></div>
+    </div>
+  `;
+  wrap.appendChild(div);
+  if (data?.type) div.querySelectorAll('select')[0].value = data.type;
+  if (data?.grade) div.querySelectorAll('select')[1].value = data.grade;
+}
+
+function addQTRow() {
+  const tbody = document.getElementById('qt-body');
+  const tr = tbody.insertRow();
+  tr.innerHTML = `
+    <td><input type="text" placeholder="Item description" style="width:100%"></td>
+    <td><input type="number" placeholder="1" min="0" style="width:100%" oninput="calcTotal()"></td>
+    <td><input type="number" placeholder="0.00" min="0" step="0.01" style="width:100%" oninput="calcTotal()"></td>
+    <td style="font-weight:600;color:var(--navy);padding:8px">£0.00</td>
+  `;
+}
+
+function calcTotal() {
+  let subtotal = 0;
+  document.querySelectorAll('#qt-body tr').forEach(tr => {
+    const qty  = parseFloat(tr.cells[1]?.querySelector('input')?.value) || 0;
+    const unit = parseFloat(tr.cells[2]?.querySelector('input')?.value) || 0;
+    const total = qty * unit;
+    if (tr.cells[3]) tr.cells[3].textContent = '£' + total.toFixed(2);
+    subtotal += total;
+  });
+  document.getElementById('qt-subtotal').textContent = '£' + subtotal.toFixed(2);
+}
+
+/* ─── Sketch Canvas ───────────────────────────────────────────── */
+let sketchCtx, sketchDrawing = false, sketchColor = '#1B3A5C', eraserMode = false;
+let sigCtx, sigDrawing = false;
+let clsigCtx, clsigDrawing = false;
+
+function initCanvas(canvasId, wrapId, ctxRef, colorOrWidth, height, lineWidth) {
+  const canvas = document.getElementById(canvasId);
+  const wrap = document.getElementById(wrapId);
+  canvas.width  = wrap.offsetWidth;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = colorOrWidth;
+  ctx.lineWidth   = lineWidth || 2;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+  // Grid for sketch canvas
+  if (canvasId === 'sketch-canvas') {
+    ctx.strokeStyle = '#E2E8F0';
+    ctx.lineWidth = 0.5;
+    for (let x = 20; x < canvas.width; x += 20) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 20; y < canvas.height; y += 20) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+    ctx.strokeStyle = sketchColor;
+    ctx.lineWidth = 2;
+  } else {
+    ctx.strokeStyle = '#1B3A5C';
+    ctx.lineWidth = lineWidth || 2;
+  }
+  return ctx;
+}
+
+function setupCanvasEvents(canvasId, getCtx, getDrawing, setDrawing, getColor, erase) {
+  const canvas = document.getElementById(canvasId);
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: (t.clientX - rect.left) * (canvas.width / rect.width), y: (t.clientY - rect.top) * (canvas.height / rect.height) };
+  }
+  function start(e) {
+    e.preventDefault();
+    setDrawing(true);
+    const ctx = getCtx();
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+  function draw(e) {
+    e.preventDefault();
+    if (!getDrawing()) return;
+    const ctx = getCtx();
+    const pos = getPos(e);
+    if (erase && erase()) {
+      ctx.clearRect(pos.x - 10, pos.y - 10, 20, 20);
+    } else {
+      ctx.strokeStyle = typeof getColor === 'function' ? getColor() : getColor;
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+  }
+  function end(e) { setDrawing(false); }
+  canvas.addEventListener('mousedown',  start, { passive: false });
+  canvas.addEventListener('mousemove',  draw,  { passive: false });
+  canvas.addEventListener('mouseup',    end);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove',  draw,  { passive: false });
+  canvas.addEventListener('touchend',   end);
+}
+
+function setSketchColor(c) { sketchColor = c; eraserMode = false; }
+function toggleEraser()    { eraserMode = !eraserMode; }
+function clearSketch() {
+  const canvas = document.getElementById('sketch-canvas');
+  sketchCtx.clearRect(0, 0, canvas.width, canvas.height);
+  // Redraw grid
+  sketchCtx.strokeStyle = '#E2E8F0'; sketchCtx.lineWidth = 0.5;
+  for (let x = 20; x < canvas.width; x += 20) { sketchCtx.beginPath(); sketchCtx.moveTo(x,0); sketchCtx.lineTo(x,canvas.height); sketchCtx.stroke(); }
+  for (let y = 20; y < canvas.height; y += 20) { sketchCtx.beginPath(); sketchCtx.moveTo(0,y); sketchCtx.lineTo(canvas.width,y); sketchCtx.stroke(); }
+  sketchCtx.strokeStyle = sketchColor; sketchCtx.lineWidth = 2;
+}
+function clearSig()   { sigCtx.clearRect(0, 0, document.getElementById('sig-canvas').width, document.getElementById('sig-canvas').height); }
+function clearClSig() { clsigCtx.clearRect(0, 0, document.getElementById('clsig-canvas').width, document.getElementById('clsig-canvas').height); }
+
+function insertPhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.getElementById('sketch-canvas');
+      sketchCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ─── OneDrive Upload ─────────────────────────────────────────── */
+async function uploadToOneDrive(accessToken, filename, content, mimeType) {
+  // Ensure folder exists
+  await fetch(`https://graph.microsoft.com/v1.0/me/drive/root:/${CONFIG.ONEDRIVE_FOLDER}:/children`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: CONFIG.ONEDRIVE_FOLDER, folder: {}, '@microsoft.graph.conflictBehavior': 'ignore' }),
+  }).catch(() => {}); // folder may already exist
+
+  // Create subfolder for folder structure: OneDrive/Ease Electrical Surveys/
+  const url = `https://graph.microsoft.com/v1.0/me/drive/root:/${encodeURIComponent(CONFIG.ONEDRIVE_FOLDER)}/${encodeURIComponent(filename)}:/content`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': mimeType },
+    body: content,
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Upload failed: ${res.status} ${err}`);
+  }
+  return res.json();
+}
+
+/* ─── Generate HTML Report ────────────────────────────────────── */
+function generateReport(data) {
+  const checked = (name) => {
+    return Object.keys(data).filter(k => k.startsWith('__cb_' + name + '__') && data[k]).map(k => k.replace('__cb_' + name + '__', '').replace(/_/g, ' ')).join(', ') || '—';
+  };
+  const v = (id) => data[id] || '—';
+
+  let dzRows = '', eeRows = '', qtRows = '', sdInfo = '';
+  if (data.__dz_rows) data.__dz_rows.forEach((r,i) => {
+    dzRows += `<tr><td>${i+1}</td><td>${r.floor||''}</td><td>${r.room||''}</td><td>${r.devtype||''}</td><td>${r.model||''}</td><td>${r.grade||''}</td><td>${r.env||''}</td><td>${r.wiredwl||''}</td><td>${r.tamper||''}</td><td>${r.notes||''}</td></tr>`;
+  });
+  if (data.__ee_rows) data.__ee_rows.forEach((r,i) => {
+    eeRows += `<tr><td>${i+1}</td><td>${r.loc||''}</td><td>${r.device||''}</td><td>${r.entry||''}</td><td>${r.exit||''}</td><td>${r.finalexit||''}</td><td>${r.entryroute||''}</td></tr>`;
+  });
+  if (data.__qt_rows) data.__qt_rows.forEach(r => {
+    const total = (parseFloat(r.qty)||0) * (parseFloat(r.unit)||0);
+    qtRows += `<tr><td>${r.desc||''}</td><td>${r.qty||''}</td><td>£${parseFloat(r.unit||0).toFixed(2)}</td><td>£${total.toFixed(2)}</td></tr>`;
+  });
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Survey ${v('f_sref')}</title>
+<style>
+body{font-family:Arial,sans-serif;font-size:11pt;color:#1A202C;max-width:210mm;margin:0 auto;padding:20px}
+h1{background:#1B3A5C;color:#F5A623;padding:10px 16px;font-size:16pt;margin:0}
+h2{background:#2970B0;color:white;padding:6px 12px;font-size:11pt;margin:20px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:12px}
+th{background:#1B3A5C;color:white;padding:6px 8px;text-align:left}
+td{padding:5px 8px;border:1px solid #CBD5E0}
+tr:nth-child(even) td{background:#F7FAFC}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.cell{padding:5px 8px;border:1px solid #CBD5E0}
+.label{font-weight:700;color:#2970B0;font-size:9.5pt}
+.header{display:flex;justify-content:space-between;align-items:center;background:#1B3A5C;color:white;padding:8px 16px;margin-bottom:0}
+.footer{margin-top:30px;font-size:9pt;color:#718096;border-top:1px solid #CBD5E0;padding-top:8px}
+img.sig{max-height:60px;border:1px solid #CBD5E0;border-radius:4px}
+@media print{h2{background:#1B3A5C}}
+</style></head><body>
+<div class="header"><span style="font-weight:900;font-size:14pt">EASE ELECTRICAL LTD</span><span style="font-size:10pt">dave@easeelectricalltd.co.uk</span></div>
+<h1>PD 6662:2017 SITE SURVEY DOCUMENT</h1>
+
+<h2>1. Survey Details</h2>
+<table><tr><th>Survey Ref</th><th>Date of Survey</th><th>Surveyor</th><th>NSI/SSAIB No</th></tr>
+<tr><td>${v('f_sref')}</td><td>${v('f_date')}</td><td>${v('f_surveyor')}</td><td>${v('f_ssaib')}</td></tr></table>
+
+<h2>2. Client &amp; Site Information</h2>
+<table><tr><th>Client Name</th><td>${v('f_cname')}</td><th>Site Name</th><td>${v('f_sname')}</td></tr>
+<tr><th>Site Address</th><td>${v('f_saddr')}</td><th>Postcode</th><td>${v('f_postcode')}</td></tr>
+<tr><th>Client Tel</th><td>${v('f_ctel')}</td><th>Client Email</th><td>${v('f_cemail')}</td></tr>
+<tr><th>Key Holder 1</th><td>${v('f_kh1')} – ${v('f_kh1tel')}</td><th>Key Holder 2</th><td>${v('f_kh2')} – ${v('f_kh2tel')}</td></tr>
+<tr><th>Police URN</th><td>${v('f_urn')}</td><th>Insurer</th><td>${v('f_insurer')}</td></tr></table>
+
+<h2>3. Property Details</h2>
+<table><tr><th>Property Type</th><td>${checked('proptype')}</td><th>Construction</th><td>${checked('construction')}</td></tr>
+<tr><th>No. of Floors</th><td>${v('f_floors')}</td><th>Year Built</th><td>${v('f_yearbuilt')}</td></tr>
+<tr><th>Occupancy</th><td>${checked('occupancy')}</td><th>Usage</th><td>${checked('usage')}</td></tr>
+<tr><th>Opening Hours</th><td>${v('f_hours')}</td><th>Last Set Time</th><td>${v('f_lastset')}</td></tr>
+<tr><th>Access Points</th><td>${v('f_access')}</td><th>Vulnerable Points</th><td>${v('f_vulnpts')}</td></tr>
+<tr><th>CCTV</th><td>${checked('cctv')}</td><th>Other Security</th><td>${checked('othersec')}</td></tr></table>
+
+<h2>4. Existing Alarm System</h2>
+<table><tr><th>Existing System</th><td>${checked('existing')}</td><th>Make/Model</th><td>${v('f_exmake')}</td></tr>
+<tr><th>Approx Age (yrs)</th><td>${v('f_exage')}</td><th>Existing Grade</th><td>${v('f_exgrade')}</td></tr>
+<tr><th>Existing Zones</th><td>${v('f_exzones')}</td><th>Wiring Condition</th><td>${checked('wiring')}</td></tr>
+<tr><th>ARC Contract</th><td colspan="3">${checked('arc')}</td></tr></table>
+
+<h2>5. Grade &amp; Environmental Class</h2>
+<table><tr><th>Recommended Grade</th><td>${checked('grade')}</td><th>Confirmed Grade</th><td>${v('f_confgrade')}</td></tr>
+<tr><th>Env. Class</th><td>${checked('envclass')}</td><th>Confirmed Env. Class</th><td>${v('f_confenv')}</td></tr>
+<tr><th>Grade Justification</th><td colspan="3">${v('f_gradejust')}</td></tr></table>
+
+<h2>6. Entry / Exit Route Details</h2>
+<table><tr><th>#</th><th>Location/Door</th><th>Device Proposed</th><th>Entry Delay (s)</th><th>Exit Delay (s)</th><th>Final Exit?</th><th>Entry Route?</th></tr>${eeRows||'<tr><td colspan="7">None recorded</td></tr>'}</table>
+
+<h2>7. Detection Zone Schedule</h2>
+<table><tr><th>#</th><th>Floor</th><th>Room/Area</th><th>Device Type</th><th>Make/Model</th><th>Grade</th><th>Env</th><th>Wired/WL</th><th>Tamper</th><th>Notes</th></tr>${dzRows||'<tr><td colspan="10">None recorded</td></tr>'}</table>
+
+<h2>8. Control &amp; Indicating Equipment</h2>
+<table><tr><th>Make/Model</th><td>${v('f_ciemake')}</td><th>Location</th><td>${v('f_cieloc')}</td></tr>
+<tr><th>CIE Grade</th><td>${checked('ciegrade')}</td><th>No. of Zones</th><td>${v('f_ciezones')}</td></tr>
+<tr><th>No. of Users</th><td>${v('f_cieusers')}</td><th>EN 50131 Compliant</th><td>${v('f_ciecompliant')}</td></tr>
+<tr><th>Keypad Type</th><td>${checked('kptype')}</td><th>Keypad Location(s)</th><td>${v('f_kploc')}</td></tr>
+<tr><th>No. of Keypads</th><td>${v('f_kpqty')}</td><th>Event Log</th><td>${checked('evlog')}</td></tr>
+<tr><th>Log Capacity</th><td>${v('f_logcap')}</td><th></th><td></td></tr></table>
+
+<h2>9. Signalling &amp; ARC</h2>
+<table><tr><th>Signalling Method</th><td>${checked('sigmethod')}</td><th>ARC Name</th><td>${v('f_arcname')}</td></tr>
+<tr><th>ARC Tel</th><td>${v('f_arctel')}</td><th>Signalling Standard</th><td>${v('f_sigstd')}</td></tr>
+<tr><th>Response Category</th><td>${v('f_respcat')}</td><th>Confirmed Alarm</th><td>${checked('confalarm')}</td></tr></table>
+
+<h2>10–12. Sounders, Power &amp; Cabling</h2>
+<table><tr><th>Sounder Delay (s)</th><td>${v('f_snddelay')}</td><th>Duration (min)</th><td>${v('f_snddur')}</td></tr>
+<tr><th>Strobe Required</th><td>${checked('strobe')}</td><th>Cable Type</th><td>${checked('cabletype')}</td></tr>
+<tr><th>Cable Route</th><td>${checked('cableroute')}</td><th>Approx Cable Run</th><td>${v('f_cablerun')} m</td></tr>
+<tr><th>Mains Available</th><td>${checked('mains')}</td><th>Spur Available</th><td>${checked('spur')}</td></tr>
+<tr><th>Standby Battery</th><td>${v('f_batthrs')}</td><th>CU Location</th><td>${v('f_culoc')}</td></tr>
+<tr><th>Power Notes</th><td colspan="3">${v('f_pwnotes')}</td></tr></table>
+
+<h2>13. Additional Requirements</h2>
+<table><tr><th>Panic Buttons</th><td>${checked('panic')} (Qty: ${v('f_panicqty')})</td><th>Remote App</th><td>${checked('remoteapp')}</td></tr>
+<tr><th>Smart Home</th><td>${v('f_smarthome')}</td><th>Hazards</th><td>${v('f_hazards')}</td></tr>
+<tr><th>Client Requirements</th><td colspan="3">${v('f_clientreqs')}</td></tr></table>
+
+<h2>14. Site Sketch</h2>
+<img src="${data.__sketch||''}" style="max-width:100%;border:1px solid #CBD5E0;border-radius:4px">
+<p style="font-size:10pt;margin-top:4px"><strong>Key:</strong> ${v('f_sketchnotes')}</p>
+
+<h2>15. Preliminary Quotation</h2>
+<table><tr><th>Item Description</th><th>Qty</th><th>Unit (£)</th><th>Total (£)</th></tr>${qtRows||'<tr><td colspan="4">No items recorded</td></tr>'}
+<tr><td colspan="3" style="text-align:right;font-weight:700">Subtotal</td><td style="font-weight:700">${document.getElementById('qt-subtotal').textContent}</td></tr></table>
+<p><strong>Install Time:</strong> ${v('f_installdays')} day(s) &nbsp; <strong>Annual Maintenance:</strong> £${v('f_maintenance')}</p>
+<p><strong>Notes/Exclusions:</strong> ${v('f_qtnotes')}</p>
+
+<h2>16. Declaration &amp; Sign-Off</h2>
+<table><tr><th>Surveyor Name</th><td>${v('f_declname')}</td><th>Date</th><td>${v('f_decldate')}</td></tr>
+<tr><th>NSI/SSAIB Cert</th><td>${v('f_declcert')}</td><th>Company</th><td>${v('f_declco')}</td></tr></table>
+<p><strong>Surveyor Signature:</strong><br><img class="sig" src="${data.__sig||''}"></p>
+<p><strong>Client Representative:</strong> ${v('f_clientrepname')}</p>
+<p><strong>Client Signature:</strong><br><img class="sig" src="${data.__clsig||''}"></p>
+<p><strong>Survey Notes:</strong> ${v('f_surveynotes')}</p>
+
+<div class="footer">
+  EASE-SS-001 | Rev 1.0 | ${new Date().toLocaleDateString('en-GB')} | PD 6662:2017 / BS EN 50131<br>
+  The completed survey forms the basis of the System Design Document required under PD 6662:2017 Clause 4.
+  This document should be retained by the installing company. A copy should be provided to the client upon request.
+</div>
+</body></html>`;
+}
+
+/* ─── Submit Survey ───────────────────────────────────────────── */
+async function submitSurvey() {
+  if (!currentAccount) { toast('Please sign in first', 'error'); return; }
+  const sref = document.getElementById('f_sref').value.trim() || 'NREF';
+  const dateStr = document.getElementById('f_date').value || new Date().toISOString().split('T')[0];
+
+  document.getElementById('submit-label').style.display = 'none';
+  document.getElementById('submit-spinner').classList.add('active');
+  document.getElementById('submit-btn').disabled = true;
+
+  try {
+    const token = await getAccessToken();
+    if (!token) return; // redirect in progress
+    const data = collectFormData();
+    const filename = `EASE-SS-${sref}-${dateStr}`;
+    // Upload HTML report
+    const html = generateReport(data);
+    await uploadToOneDrive(token, filename + '.html', html, 'text/html');
+    // Upload JSON backup
+    await uploadToOneDrive(token, filename + '.json', JSON.stringify(data, null, 2), 'application/json');
+    // Clear draft
+    localStorage.removeItem('ee_survey_draft_v1');
+    toast('✓ Saved to OneDrive!', 'success');
+  } catch(e) {
+    console.error('Upload error:', e);
+    toast('Upload failed – check connection', 'error');
+  } finally {
+    document.getElementById('submit-label').style.display = 'inline';
+    document.getElementById('submit-spinner').classList.remove('active');
+    document.getElementById('submit-btn').disabled = false;
+  }
+}
+
+/* ─── Toast ───────────────────────────────────────────────────── */
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + (type || '');
+  setTimeout(() => el.className = '', 3000);
+}
+
+/* ─── Service Worker ──────────────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW:', e));
+}
+
+/* ─── Init on load ────────────────────────────────────────────── */
+window.addEventListener('load', async () => {
+  // Init sketch canvas
+  sketchCtx = initCanvas('sketch-canvas', 'sketch-canvas-wrap', null, sketchColor, 340, 2);
+  setupCanvasEvents('sketch-canvas',
+    () => sketchCtx,
+    () => sketchDrawing,
+    (v) => { sketchDrawing = v; },
+    () => sketchColor,
+    () => eraserMode
+  );
+  // Init signature canvases
+  sigCtx = initCanvas('sig-canvas', 'sig-canvas-wrap', null, '#1B3A5C', 100, 2);
+  setupCanvasEvents('sig-canvas', () => sigCtx, () => sigDrawing, (v) => { sigDrawing = v; }, '#1B3A5C', () => false);
+  clsigCtx = initCanvas('clsig-canvas', 'clsig-canvas-wrap', null, '#1B3A5C', 100, 2);
+  setupCanvasEvents('clsig-canvas', () => clsigCtx, () => clsigDrawing, (v) => { clsigDrawing = v; }, '#1B3A5C', () => false);
+
+  // Init MSAL
+  await initMsal();
+
+  // Init dynamic table rows (start with some)
+  for (let i = 0; i < 3; i++) addEERow();
+  for (let i = 0; i < 8; i++) addDZRow();
+  for (let i = 0; i < 2; i++) addQTRow();
+  addSDRow();
+});
+</script>
+</body>
+</html>
