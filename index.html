@@ -563,6 +563,7 @@ select {
       Sign in with Microsoft 365
     </button>
     <p class="login-note">Surveys are saved to your OneDrive under<br><strong>Ease Electrical Surveys</strong></p>
+    <div id="auth-error" style="display:none;background:#FEE2E2;border:1px solid #FCA5A5;border-radius:10px;padding:14px 18px;max-width:340px;font-size:13px;color:#B91C1C;text-align:left;line-height:1.5;"></div>
   </div>
 
   <!-- SURVEY FORM (hidden until signed in) -->
@@ -1426,13 +1427,26 @@ select {
 <div id="toast"></div>
 
 <!-- ═══ SCRIPTS ═════════════════════════════════════════════════ -->
-<script src="https://alcdn.msauth.net/browser/3.27.0/js/msal-browser.min.js"></script>
+<!-- MSAL with fallback CDN -->
+<script>
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/dist/msal-browser.min.js';
+  s.onerror = function() {
+    // fallback
+    var s2 = document.createElement('script');
+    s2.src = 'https://unpkg.com/@azure/msal-browser/dist/index.js';
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+})();
+</script>
 <script>
 /* ─────────────────────────────────────────────────────────────
    CONFIGURATION — update CLIENT_ID after Azure AD app registration
    ───────────────────────────────────────────────────────────── */
 const CONFIG = {
-  CLIENT_ID:    'e87562f6-96f4-424e-8ee7-8f65463493a8',   // ← Paste your Azure AD App (client) ID here
+  CLIENT_ID:    'YOUR_CLIENT_ID_HERE',   // ← Paste your Azure AD App (client) ID here
   ONEDRIVE_FOLDER: 'Ease Electrical Surveys',
 };
 
@@ -1449,40 +1463,86 @@ const msalConfig = {
   },
 };
 const loginScopes = ['User.Read', 'Files.ReadWrite'];
-let msalInstance;
+let msalInstance = null;
 let currentAccount = null;
+let msalReady = false;
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.style.display = 'block';
+  el.innerHTML = '⚠️ ' + msg;
+}
+
+// Wait for MSAL script to load (CDN loaded dynamically)
+function waitForMsal(cb, attempts) {
+  attempts = attempts || 0;
+  if (typeof msal !== 'undefined') { cb(); return; }
+  if (attempts > 40) {
+    showAuthError('Could not load the Microsoft sign-in library. Check your internet connection and reload the page.');
+    return;
+  }
+  setTimeout(() => waitForMsal(cb, attempts + 1), 250);
+}
 
 async function initMsal() {
-  msalInstance = new msal.PublicClientApplication(msalConfig);
-  await msalInstance.initialize();
+  waitForMsal(async function() {
+    try {
+      // Validate client ID
+      if (!CONFIG.CLIENT_ID || CONFIG.CLIENT_ID === 'YOUR_CLIENT_ID_HERE') {
+        showAuthError('App not configured: CLIENT_ID is missing in index.html. Please follow the setup guide.');
+        return;
+      }
+      msalInstance = new msal.PublicClientApplication(msalConfig);
+      await msalInstance.initialize();
+      msalReady = true;
 
-  // Handle redirect response after login
-  try {
-    const result = await msalInstance.handleRedirectPromise();
-    if (result && result.account) {
-      currentAccount = result.account;
-      onSignedIn();
+      // Handle redirect response after login
+      try {
+        const result = await msalInstance.handleRedirectPromise();
+        if (result && result.account) {
+          currentAccount = result.account;
+          onSignedIn();
+          return;
+        }
+      } catch (e) {
+        console.error('Redirect error:', e);
+        showAuthError('Sign-in error: ' + (e.errorMessage || e.message || e));
+        return;
+      }
+
+      // Check if already signed in
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length > 0) {
+        currentAccount = accounts[0];
+        onSignedIn();
+      }
+    } catch (e) {
+      console.error('MSAL init error:', e);
+      showAuthError('Initialisation error: ' + (e.message || JSON.stringify(e)) + '<br><br>Double-check your Client ID and redirect URI in Azure.');
     }
-  } catch (e) {
-    console.error('Redirect error:', e);
-  }
-
-  // Check if already signed in
-  const accounts = msalInstance.getAllAccounts();
-  if (accounts.length > 0) {
-    currentAccount = accounts[0];
-    onSignedIn();
-  }
+  });
 }
 
 async function handleAuthClick() {
+  if (!msalReady) {
+    if (CONFIG.CLIENT_ID === 'YOUR_CLIENT_ID_HERE') {
+      showAuthError('Please update CLIENT_ID in index.html with your Azure Application ID before signing in.');
+    } else {
+      showAuthError('Microsoft sign-in library is still loading — please wait a moment and try again.');
+    }
+    return;
+  }
   if (currentAccount) {
-    // Sign out
     msalInstance.logoutRedirect({ account: currentAccount });
     return;
   }
-  // Sign in via redirect (most reliable on iOS Safari)
-  msalInstance.loginRedirect({ scopes: loginScopes });
+  try {
+    // Sign in via redirect (most reliable on iOS Safari)
+    await msalInstance.loginRedirect({ scopes: loginScopes });
+  } catch (e) {
+    console.error('Login error:', e);
+    showAuthError('Login failed: ' + (e.errorMessage || e.message || e));
+  }
 }
 
 async function getAccessToken() {
